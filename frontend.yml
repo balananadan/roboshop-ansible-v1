@@ -1,9 +1,8 @@
 - name: Setup Frontend Component
   hosts: all
   tasks:
-    - ping:
-   # - name: Install nginx
-   #   ansible.builtin.dnf:
-  #      name: nginx
-  #      state: present
+    - name: Install nginx
+      ansible.builtin.dnf:
+        name: nginx
+        state: present
 
