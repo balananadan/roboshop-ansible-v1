@@ -2,7 +2,7 @@
   hosts: all
   become: yes
   tasks:
-      -ping:
+    - ping:
 
 #    - name: Install nginx
 #        name: nginx
