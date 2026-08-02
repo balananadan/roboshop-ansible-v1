@@ -1,10 +1,10 @@
-- name: Setup Frontend Component
-  hosts: all
-  become: yes
+- hosts: all
   tasks:
-    - ping:
+    -ping:
 
-#    - name: Install nginx
-#        name: nginx
-#        state: present
+- name: first playbook
+  hosts: all
+  tasks:
+    - name: Check Ping
+      ansible.builtin.ping:
 
