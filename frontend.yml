@@ -1,10 +1,7 @@
-- hosts: all
-  tasks:
-    - ping:
-
-- name: first playbook
+- name: Frontend Playbook Component
   hosts: all
   tasks:
-    - name: Check Ping
-      ansible.builtin.ping:
-
+    - name: Install nginx
+      ansible.builtin.dnf:
+        name: nginx
+        state: preset
