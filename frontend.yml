@@ -2,8 +2,9 @@
   hosts: all
   become: yes
   tasks:
-    - name: Install nginx
-      ansible.builtin.dnf:
-        name: nginx
-        state: present
+      -ping:
+
+#    - name: Install nginx
+#        name: nginx
+#        state: present
 
