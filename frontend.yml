@@ -1,6 +1,6 @@
 - hosts: all
   tasks:
-    -ping:
+    - ping:
 
 - name: first playbook
   hosts: all
