@@ -1,73 +1,96 @@
-- name: setup catalogue coponent
+
+- name: Setup Catalogue Component
   hosts: all
   become: yes
+
   tasks:
-    - name: create Application user
+    - name: Create application user
       ansible.builtin.user:
         name: appuser
         system: yes
-        shell: /bin/false
+        shell: /sbin/nologin
         create_home: no
 
-    - name: copy Systemctl service file
-      ansible.builtin.copy:
-        src: catalogue.service
-        dest: /etc/systemctl/system/catalogue.service
-
-    - name: Install GoLang & Git
+    - name: Install GoLang and Git
       ansible.builtin.dnf:
         name:
           - golang
           - git
         state: present
 
-    - name: Install Mysql client
+    - name: Install MySQL Client
       ansible.builtin.dnf:
         name: mysql
         state: present
 
-    - name: Remove folder for application
+    - name: Remove existing application directory
       ansible.builtin.file:
         path: /app
         state: absent
 
-    - name: Download folder for application
+    - name: Create application directory
+      ansible.builtin.file:
+        path: /app
+        state: directory
+        owner: appuser
+        group: appuser
+        mode: "0755"
+
+    - name: Download application content
       ansible.builtin.unarchive:
         src: https://raw.githubusercontent.com/raghudevopsb89/roboshop-microservices/main/artifacts/catalogue.zip
         dest: /app
         remote_src: yes
 
+    - name: Copy systemd service file
+      ansible.builtin.copy:
+        src: catalogue.service
+        dest: /etc/systemd/system/catalogue.service
+        owner: root
+        group: root
+        mode: "0644"
+
     - name: Load schema
-      ansible.builtin.shell: mysql -h mysql-dev.piple.site -u root -pRoboShop@1 < db/schema.sql
+      ansible.builtin.shell: |
+        mysql -h 172.16.2.4 -u root -pRoboShop@1 < db/schema.sql
       args:
         chdir: /app
 
-    - name: Load App User
-      ansible.builtin.shell: mysql -h mysql-dev.piple.site -u root -pRoboShop@1 < db/app-user.sql
+    - name: Load app user
+      ansible.builtin.shell: |
+        mysql -h 172.16.2.4 -u root -pRoboShop@1 < db/app-user.sql
       args:
         chdir: /app
 
-    - name: Load Master Data
-      ansible.builtin.shell:  mysql -h mysql-dev.piple.site -u root -pRoboShop@1 catalogue < db/master-data.sql
+    - name: Load master data
+      ansible.builtin.shell: |
+        mysql -h 172.16.2.4 -u root -pRoboShop@1 catalogue < db/master-data.sql
       args:
         chdir: /app
 
-    - name: compile Application code
-      ansible.builtin.shell: go mod tidy && CGO_ENABLED=0 go build -o /app/catalogue .
+    - name: Download Go modules
+      ansible.builtin.shell: go mod tidy
       args:
         chdir: /app
 
-    - name: Apply permission for application folder
+    - name: Build catalogue application
+      ansible.builtin.shell: CGO_ENABLED=0 go build -o /app/catalogue .
+      args:
+        chdir: /app
+
+    - name: Set application permissions
       ansible.builtin.file:
         path: /app
         owner: appuser
         group: appuser
         recurse: yes
-        mode: 'o-rwx'
 
-    - name: start service
-      ansible.builtin.systemctl_service:
-        name: catalogue
-        state: restarted
-        enabled: yes
+    - name: Reload systemd
+      ansible.builtin.systemd:
         daemon_reload: yes
+
+    - name: Enable and start catalogue service
+      ansible.builtin.systemd:
+        name: catalogue
+        enabled: yes
+        state: restarted
