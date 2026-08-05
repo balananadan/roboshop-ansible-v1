@@ -8,9 +8,9 @@
         state: present
 
     - name: start mysqld server
-      ansible.builtin.dnf:
+      ansible.builtin.systemd:
         name: mysqld
-        state: present
+        state: started
         enabled: yes
 
     - name: setup Mysql root password
