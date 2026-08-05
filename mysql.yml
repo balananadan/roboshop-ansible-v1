@@ -1,0 +1,24 @@
+- name: setup Mysql Component
+  hosts: all
+  become: yes
+  tasks:
+    - name: Install Mysql server
+      ansible.builtin.dnf:
+        name: mysql8.4-server
+        state: present
+
+    - name: start mysqld server
+      ansible.builtin.dnf:
+        name: mysqld
+        state: present
+        enabled: yes
+
+    - name: setup Mysql root password
+      ansible.builtin.shell:
+        mysql -u root -e "
+        CREATE USER 'root'@'%' IDENTIFIED BY 'RoboShop@1';
+        GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
+        ALTER USER 'root'@'localhost' IDENTIFIED BY 'RoboShop@1';
+        FLUSH PRIVILEGES;
+        "
+
