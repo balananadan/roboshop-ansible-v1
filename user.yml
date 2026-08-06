@@ -1,4 +1,4 @@
-- name: Setup user Component
+- name: Setup User Component
   hosts: all
   become: yes
   tasks:
@@ -9,13 +9,18 @@
         shell: /bin/false
         create_home: no
 
-    - name: copy SystemD service file
+    - name: Copy SystemD Service file
       ansible.builtin.copy:
         src: user.service
         dest: /etc/systemd/system/user.service
 
-    - name: Install Nodejs
+    - name: Install NodeJS
       ansible.builtin.shell: curl -fsSL https://rpm.nodesource.com/setup_20.x | bash -
+
+    - name: Install NodeJS
+      ansible.builtin.dnf:
+        name: nodejs
+        state: present
 
     - name: Remove folder for application
       ansible.builtin.file:
@@ -29,9 +34,9 @@
 
     - name: Download Application Content
       ansible.builtin.unarchive:
-      src: https://raw.githubusercontent.com/raghudevopsb89/roboshop-microservices/main/artifacts/user.zip
-      dest: /app
-      remote_src: yes
+        src: https://raw.githubusercontent.com/raghudevopsb89/roboshop-microservices/main/artifacts/user.zip
+        dest: /app
+        remote_src: yes
 
     - name: Download App Dependencies
       ansible.builtin.shell: npm install --production
@@ -52,5 +57,3 @@
         state: restarted
         enabled: yes
         daemon_reload: yes
-
-
